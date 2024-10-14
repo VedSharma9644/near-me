@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 
-// Updated salon schema
 const salonSchema = new mongoose.Schema({
-    name: { type: String, required: true },         // Salon name
-    ownerName: { type: String, required: true },    // Owner name
-    numberOfStylists: { type: Number, required: true }, // Number of stylists
-    openingTime: { type: String, required: true },   // Opening time (you can change type if needed)
-    closingTime: { type: String, required: true },   // Closing time (you can change type if needed)
-    services: { type: [String], required: true },    // Array of services
-    username: { type: String, required: true },      // Username
-    password: { type: String, required: true },      // Password
+    name: { type: String, required: true },
+    ownerName: { type: String, required: true }, // Add ownerName field
+    numberOfStylists: { type: Number, required: true }, // Add numberOfStylists
+    openingTime: { type: String, required: true }, // Add openingTime
+    closingTime: { type: String, required: true }, // Add closingTime
+    services: { type: [String], required: true }, // Add services array
+    username: { type: String, required: true },
+    password: { type: String, required: true },
 }, { timestamps: true });
 
 const Salon = mongoose.model('Salon', salonSchema);

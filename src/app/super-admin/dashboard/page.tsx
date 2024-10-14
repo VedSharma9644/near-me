@@ -66,12 +66,14 @@ export default function SuperAdminDashboard() {
               <td className="border border-gray-200 p-2">{salon.ownerName}</td>
               <td className="border border-gray-200 p-2">{salon.address}</td>
               <td className="border border-gray-200 p-2">
-                <button 
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
-                  onClick={() => router.push(`/super-admin/salon-details/${salon._id}`)} // Navigate to salon details page
-                >
-                  Full Details
-                </button>
+              <button 
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                    onClick={() => router.push(`/super-admin/salon-details/${salon._id}`)} // Navigate to salon details page
+                    >
+
+                    Full Details
+              </button>
+
               </td>
             </tr>
           ))}
