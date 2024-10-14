@@ -1,0 +1,70 @@
+/* src/app/salon-admin/Register.css */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  div {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  input[type="time"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+  
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #218838;
+  }
+  
+  @media (max-width: 600px) {
+    form {
+      padding: 10px;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    input[type="time"],
+    input[type="password"] {
+      font-size: 12px;
+      padding: 8px;
+    }
+    
+    button[type="submit"] {
+      padding: 8px;
+      font-size: 14px;
+    }
+  }
+  
