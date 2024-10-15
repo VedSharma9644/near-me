@@ -1,4 +1,4 @@
-// src/app/api/login/route.ts
+// src/app/api/login/route.ts (This is login for super admin)
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
