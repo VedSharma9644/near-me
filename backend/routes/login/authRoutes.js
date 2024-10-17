@@ -1,5 +1,5 @@
 const express = require('express');
-const Salon = require('../../models/Salon');
+const Salon = require('../../models/Salon'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); // Load environment variables

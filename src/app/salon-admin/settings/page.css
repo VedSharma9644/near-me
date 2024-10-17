@@ -1,0 +1,46 @@
+.settings {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .settings h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .settings-section {
+    margin-bottom: 20px;
+  }
+  
+  .settings-section h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .settings-section p {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+  
+  .settings-section ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .settings-section ul li {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  
+  .image-gallery {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .salon-image {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  

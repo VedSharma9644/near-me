@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import CORS middleware
 const authRoutes = require('./routes/login/authRoutes'); // Updated path for login
 const salonRoutes = require('./routes/register/salonRoutes'); // Correct path for salon registration
+ // For getting the data from database to salon-admin page header
+const salonAdminRoutes = require('./routes/salonAdmin/salonAdminRoutes'); // Adjust based on your structure
+
 
 const app = express();
 
@@ -31,6 +34,9 @@ app.use('/api/login', authRoutes); // Endpoint for login
 
 // Use registration routes for salon registration
 app.use('/api/salons', salonRoutes); // Endpoint for salon registration
+
+// Get data from database to profile page
+app.use('/api/salonAdmin', salonAdminRoutes); // Ensure the correct path
 
 // Error handling middleware for unhandled routes
 app.use((req, res, next) => {
