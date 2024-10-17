@@ -6,6 +6,13 @@ const authRoutes = require('./routes/login/authRoutes'); // Updated path for log
 const salonRoutes = require('./routes/register/salonRoutes'); // Correct path for salon registration
  // For getting the data from database to salon-admin page header
 const salonAdminRoutes = require('./routes/salonAdmin/salonAdminRoutes'); // Adjust based on your structure
+ // For register the customer
+const customerRegisterationRoutes = require('./routes/Customer/registeration/customerRegisterationRoutes');
+// For login the customer
+const customerLoginRoutes = require('./routes/Customer/login/customerLoginRoutes');
+// for connecting the customer dashboard with correct customer
+const customerDashboardRoutes = require('./routes/Customer/dashboard/customerDashboardRoutes'); // Import the dashboard route
+
 
 
 const app = express();
@@ -29,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URI, {
         process.exit(1); // Exit the process if the connection fails
     });
 
+    // Salon admin API Endpoints
 // Use login routes for authentication
 app.use('/api/login', authRoutes); // Endpoint for login
 
@@ -37,6 +45,21 @@ app.use('/api/salons', salonRoutes); // Endpoint for salon registration
 
 // Get data from database to profile page
 app.use('/api/salonAdmin', salonAdminRoutes); // Ensure the correct path
+
+
+// Customer API Endpoints
+ 
+// Use the customer registration routes
+app.use('/api/customers', customerRegisterationRoutes);
+
+// Use the customer registration and login routes
+app.use('/api/customers', require('./routes/Customer/login/customerLoginRoutes'));
+app.use('/api/customers', customerLoginRoutes);
+
+// use the customer dashboard API connection 
+app.use('/api/customers', customerDashboardRoutes); // Register the dashboard route
+
+
 
 // Error handling middleware for unhandled routes
 app.use((req, res, next) => {
