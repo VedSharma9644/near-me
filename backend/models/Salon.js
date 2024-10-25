@@ -10,10 +10,21 @@ const salonSchema = new mongoose.Schema({
     pincode: { type: String, required: true },
     email: { type: String, required: true },       // Added for registration
     password: { type: String, required: true },
-    numberOfStylists: { type: Number, default: 0 }, // Optional fields for future updates
+    stylists: [
+        {
+            name: { type: String, required: true },
+            image: { type: String, required: false }, // Assuming this will be a URL or path to the image
+        }
+    ],
     openingTime: { type: String, default: "" },     // Optional
     closingTime: { type: String, default: "" },     // Optional
-    services: { type: [String], default: [] },      // Optional array for services
+    services: [
+        {
+            name: { type: String, required: true },
+            time: { type: String, required: true },   // Time in a string format like "1 hour" or "30 mins"
+            price: { type: Number, required: true },  // Price as a number
+        }
+    ],
 }, { timestamps: true });
 
 const Salon = mongoose.model('Salon', salonSchema);

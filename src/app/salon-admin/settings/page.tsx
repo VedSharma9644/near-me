@@ -1,71 +1,201 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import "./page.css"; // Styles for the settings page
+"use client"
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './page.css'; // Add your CSS for styling
 
-const Settings = () => {
-  // Example state for settings data
-  const [openingTime, setOpeningTime] = useState("9:00 AM");
-  const [closingTime, setClosingTime] = useState("9:00 PM");
-  const [numberOfStylists, setNumberOfStylists] = useState(3);
-  const [stylists, setStylists] = useState(["John Doe", "Jane Smith", "Emily Davis"]);
-  const [numberOfServices, setNumberOfServices] = useState(5);
-  const [services, setServices] = useState([
-    { name: "Haircut", price: 20, time: "30 mins" },
-    { name: "Shave", price: 15, time: "20 mins" },
-    { name: "Manicure", price: 25, time: "40 mins" },
-    { name: "Pedicure", price: 30, time: "45 mins" },
-    { name: "Hair Coloring", price: 50, time: "90 mins" }
-  ]);
+const SettingsPage = () => {
+  const [settings, setSettings] = useState({
+    openingTime: '',
+    closingTime: '',
+    stylists: [{ name: '', image: '' }],
+    services: [{ name: '', time: '', price: '' }]
+  });
+  const [isEditing, setIsEditing] = useState(false);
 
-  // State for salon images
-  const [salonImages, setSalonImages] = useState([
-    "/path-to-image1.jpg",
-    "/path-to-image2.jpg"
-  ]);
+  // Fetch the settings when the component loads
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/salon/settings', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => {
+        setSettings(response.data); // Set the fetched settings
+      })
+      .catch(error => {
+        console.error('Error fetching settings:', error);
+      });
+  }, []);
+  
+  // Handle input changes when editing settings
+  const handleChange = (type, index, field, value) => {
+    const updatedList = [...settings[type]];
+    
+    // Ensure the field exists before attempting to assign the value
+    if (updatedList[index]) {
+      updatedList[index][field] = value;
+      setSettings(prevState => ({ ...prevState, [type]: updatedList }));
+    } else {
+      console.error(`Error: ${type} at index ${index} is undefined`);
+    }
+  };
+
+  // Add new service
+  const addService = () => {
+    const newService = { name: '', time: '', price: '' }; // Default values
+    setSettings(prevState => ({
+      ...prevState,
+      services: [...prevState.services, newService],
+    }));
+  };
+
+  // Add new stylist
+  const addStylist = () => {
+    const newStylist = { name: '', image: '' }; // Initialize with empty values
+    setSettings(prevState => ({
+      ...prevState,
+      stylists: [...prevState.stylists, newStylist],
+    }));
+  };
+
+   // Delete service
+   const deleteService = (index) => {
+    const updatedServices = settings.services.filter((_, i) => i !== index);
+    setSettings(prevState => ({ ...prevState, services: updatedServices }));
+  };
+
+  // Delete stylist
+  const deleteStylist = (index) => {
+    const updatedStylists = settings.stylists.filter((_, i) => i !== index);
+    setSettings(prevState => ({ ...prevState, stylists: updatedStylists }));
+  };
+
+
+
+
+  
+  // Enable editing mode
+  const enableEditing = () => {
+    setIsEditing(true);
+  };
+
+  // Save updated settings
+  const saveSettings = () => {
+    const token = localStorage.getItem('token'); // Get the token from localStorage
+    axios.put('http://localhost:5000/api/salon/settings', settings, {
+      headers: {
+        Authorization: `Bearer ${token}` // Include the token in the headers
+      }
+    })
+      .then(response => {
+        setSettings(response.data); // Update the local state with the new data
+        setIsEditing(false); // Disable editing mode
+      })
+      .catch(error => {
+        console.error('Error saving settings:', error);
+      });
+  };
 
   return (
-    <div className="settings">
-      <h1>Salon Settings</h1>
+    <div className="settings-page">
+      <h2>Salon Settings</h2>
 
-      <div className="settings-section">
-        <h2>Operating Hours</h2>
-        <p>Opening Time: {openingTime}</p>
-        <p>Closing Time: {closingTime}</p>
+      <div>
+        <h4>Opening Time</h4>
+        <input
+          type="text"
+          value={settings.openingTime}
+          disabled={!isEditing}
+          onChange={(e) => setSettings({ ...settings, openingTime: e.target.value })}
+        />
       </div>
 
-      <div className="settings-section">
-        <h2>Stylists</h2>
-        <p>No. of Stylists: {numberOfStylists}</p>
-        <ul>
-          {stylists.map((stylist, index) => (
-            <li key={index}>{stylist}</li>
-          ))}
-        </ul>
+      <div>
+        <h4>Closing Time</h4>
+        <input
+          type="text"
+          value={settings.closingTime}
+          disabled={!isEditing}
+          onChange={(e) => setSettings({ ...settings, closingTime: e.target.value })}
+        />
       </div>
-
-      <div className="settings-section">
-        <h2>Services</h2>
-        <p>No. of Services: {numberOfServices}</p>
-        <ul>
-          {services.map((service, index) => (
-            <li key={index}>
-              <strong>{service.name}</strong> - ${service.price} ({service.time})
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="settings-section">
-        <h2>Salon Images</h2>
-        <div className="image-gallery">
-          {salonImages.map((image, index) => (
-            <img key={index} src={image} alt={`Salon image ${index + 1}`} className="salon-image" />
-          ))}
+      
+      {/* Service JSX */}
+      {settings.services.map((service, index) => (
+        <div key={index}>
+          <label>Service Name:</label>
+          <input
+            type="text"
+            value={service.name}
+            onChange={e => handleChange('services', index, 'name', e.target.value)}
+            disabled={!isEditing}
+          />
+          <label>Time:</label>
+          <input
+            type="text"
+            value={service.time}
+            onChange={e => handleChange('services', index, 'time', e.target.value)}
+            disabled={!isEditing}
+          />
+          <label>Price:</label>
+          <input
+            type="text"
+            value={service.price}
+            onChange={e => handleChange('services', index, 'price', e.target.value)}
+            disabled={!isEditing}
+          />
+          {/* Delete button for service */}
+          {isEditing && (
+            <button onClick={() => deleteService(index)}>Delete Service</button>
+          )}
         </div>
-      </div>
-      <div className="edit-settings"><button>Edit settings</button></div>
+      ))}
+<div>       {isEditing && (
+        <>
+          <button onClick={addService}>Add Service</button>
+        </>
+      )}
+</div>
+      {/* Stylists JSX */}
+      <h2>Stylists</h2>
+      {settings.stylists.map((stylist, index) => (
+        <div key={index}>
+          <label>Stylist Name:</label>
+          <input
+            type="text"
+            value={stylist.name}
+            onChange={e => handleChange('stylists', index, 'name', e.target.value)}
+            disabled={!isEditing}
+          />
+          <label>Image URL:</label>
+          <input
+            type="text"
+            value={stylist.image}
+            onChange={e => handleChange('stylists', index, 'image', e.target.value)}
+            disabled={!isEditing}
+          />
+           {/* Delete button for stylist */}
+           {isEditing && (
+            <button onClick={() => deleteStylist(index)}>Delete Stylist</button>
+          )}
+        </div>
+      ))}
+       <div>{isEditing && (
+        <>
+          <button onClick={addStylist}>Add Stylist</button>
+          
+        </>
+      )}</div>
+
+     
+
+      {!isEditing ? (
+        <button onClick={enableEditing}>Edit Settings</button>
+      ) : (
+        <button onClick={saveSettings}>Save Settings</button>
+      )}
     </div>
   );
 };
 
-export default Settings;
+export default SettingsPage;

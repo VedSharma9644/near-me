@@ -12,6 +12,7 @@ router.get('/dashboard', customerAuthMiddleware, async (req, res) => {
         }
 
         res.json({
+            _id: customer._id, // Include customer ID
             name: customer.name,
             email: customer.email,
             phoneNumber: customer.phoneNumber,
