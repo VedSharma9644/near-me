@@ -1,63 +1,65 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+const moment = require("moment");
+
+import "./page.css";
 
 const CustomerDashboard = () => {
   const router = useRouter();
   const [customerData, setCustomerData] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [salons, setSalons] = useState([]);
   const [stylists, setStylists] = useState([]);
   const [services, setServices] = useState([]);
-  const [selectedSalonId, setSelectedSalonId] = useState('');
-  const [selectedStylistId, setSelectedStylistId] = useState('');
-  const [selectedServiceId, setSelectedServiceId] = useState('');
-  const [appointmentDate, setAppointmentDate] = useState('');
-  const [appointmentTime, setAppointmentTime] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const [selectedSalonId, setSelectedSalonId] = useState("");
+  const [selectedStylistId, setSelectedStylistId] = useState("");
+  const [selectedServiceIds, setSelectedServiceIds] = useState([]);
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
+  const [activeHours, setActiveHours] = useState({ openingTime: "", closingTime: "" });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      router.push('/customer/login');
+      router.push("/customer/login");
     } else {
       fetchCustomerData();
       fetchSalons();
     }
   }, []);
 
-  // Fetch customer data and salons from backend
   const fetchCustomerData = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch('http://localhost:5000/api/customers/dashboard', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await fetch("http://localhost:5000/api/customers/dashboard", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         const data = await response.json();
         setCustomerData(data);
       } else {
-        setError('Failed to fetch customer data.');
-        localStorage.removeItem('token');
-        router.push('/customer/login');
+        setError("Failed to fetch customer data.");
+        localStorage.removeItem("token");
+        router.push("/customer/login");
       }
     } catch (err) {
-      setError('Something went wrong.');
-      console.error('Error fetching customer data:', err);
+      setError("Something went wrong.");
+      console.error("Error fetching customer data:", err);
     }
   };
 
   const fetchSalons = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/salons');
+      const response = await fetch("http://localhost:5000/api/salons");
       const data = await response.json();
       setSalons(data);
     } catch (error) {
-      console.error('Error fetching salons:', error);
+      console.error("Error fetching salons:", error);
     }
   };
 
@@ -72,7 +74,7 @@ const CustomerDashboard = () => {
       }
     } catch (error) {
       setStylists([]);
-      console.error('Error fetching stylists:', error);
+      console.error("Error fetching stylists:", error);
     }
   };
 
@@ -83,80 +85,116 @@ const CustomerDashboard = () => {
         const data = await response.json();
         setServices(Array.isArray(data) ? data : []);
       } else {
-        throw new Error('Failed to fetch services');
+        throw new Error("Failed to fetch services");
       }
     } catch (error) {
       setServices([]);
-      console.error('Error fetching services:', error);
+      console.error("Error fetching services:", error);
     }
   };
 
-  const handleSalonChange = (e) => {
+  const handleSalonChange = async (e) => {
     const salonId = e.target.value;
     setSelectedSalonId(salonId);
-    setSelectedStylistId(''); // Reset stylist
-    setSelectedServiceId(''); // Reset service
+    setSelectedStylistId("");
+    setSelectedServiceIds([]);
     fetchStylists(salonId);
     fetchServices(salonId);
+
+    const selectedSalon = salons.find((salon) => salon._id === salonId);
+    if (selectedSalon) {
+      setActiveHours({
+        openingTime: selectedSalon.openingTime,
+        closingTime: selectedSalon.closingTime,
+      });
+    }
+  };
+
+  const handleServiceSelect = (serviceId) => {
+    if (!selectedServiceIds.includes(serviceId)) {
+      setSelectedServiceIds([...selectedServiceIds, serviceId]);
+    }
+  };
+
+  const handleServiceRemove = (serviceId) => {
+    setSelectedServiceIds(selectedServiceIds.filter((id) => id !== serviceId));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    // Ensure appointmentDate is set correctly as a date string
-    const appointmentData = {
-      salonId: selectedSalonId,
-      stylistId: selectedStylistId, // Optional field; can be omitted if not assigned
-      serviceId: selectedServiceId,
-      appointmentDate: new Date(`${appointmentDate}T${appointmentTime}`), // Ensure this is a Date object
-      time: appointmentTime, // Include time in the request
-      customerId: customerData ? customerData._id : null,
-      customerName: customerData ? customerData.name : '', // Extracting customer name
-      customerPhone: customerData ? customerData.phoneNumber : '', // Extracting customer phone
-    };
-  
-    // Check for required fields
-    if (!appointmentData.customerId || !appointmentData.customerName || !appointmentData.customerPhone || !appointmentData.time) {
-      setError('Customer ID, name, phone, and time are required for booking an appointment.');
+
+    setError("");
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!selectedSalonId || !selectedStylistId || selectedServiceIds.length === 0 || !appointmentDate || !appointmentTime) {
+      setError("Please fill in all required fields.");
       return;
     }
-  
-    console.log('Appointment Data:', appointmentData); // Log the data being sent
-  
+
     try {
-      const response = await fetch('http://localhost:5000/api/appointments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const selectedServices = services.filter((service) => selectedServiceIds.includes(service._id));
+
+      const totalDurationInMinutes = selectedServices.reduce((total, service) => {
+        const duration = parseInt(service.time.replace(" mins", ""), 10);
+        return total + duration;
+      }, 0);
+
+      const formattedDate = moment(appointmentDate, "YYYY-MM-DD").format("YYYY-MM-DD");
+      const formattedTime = moment(appointmentTime, ["hh:mm A", "HH:mm"]).format("hh:mm A");
+
+      const appointmentData = {
+        salonId: selectedSalonId,
+        stylistId: selectedStylistId,
+        services: selectedServices.map((service) => ({
+          serviceId: service._id,
+          name: service.name,
+          duration: parseInt(service.time.replace(" mins", ""), 10),
+        })),
+        appointmentDate: formattedDate,
+        time: formattedTime,
+        totalServiceDuration: totalDurationInMinutes,
+        customerId: customerData ? customerData._id : null,
+        customerName: customerData ? customerData.name : "",
+        customerPhone: customerData ? customerData.phoneNumber : "",
+      };
+
+      setLoading(true);
+
+      const response = await fetch("http://localhost:5000/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(appointmentData),
       });
-  
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Appointment created:', result);
+        setSuccessMessage("Appointment successfully booked!");
+        setErrorMessage("");
+        console.log("Appointment created:", result);
       } else {
         const errorData = await response.json();
-        throw new Error(`Failed to create appointment: ${errorData.message}`);
+        if (response.status === 400 && errorData.nextAvailableTime) {
+          setErrorMessage(
+            `Failed to create appointment: ${errorData.message}. You can book an appointment for ${errorData.nextAvailableTime}.`
+          );
+        } else {
+          setErrorMessage(`Failed to create appointment: ${errorData.message || "An unexpected error occurred"}`);
+        }
       }
     } catch (error) {
-      console.error('Error during appointment booking:', error);
-      setError(error.message);
+      console.error("Error creating appointment:", error);
+      setErrorMessage("An unexpected error occurred while booking the appointment.");
+    } finally {
+      setLoading(false);
     }
   };
-  
-  
-  
 
   return (
     <div className="dashboard-container">
       {customerData ? (
         <>
           <h1>Welcome, {customerData.name}!</h1>
-          <div className="dashboard-details">
-            <p>Email: {customerData.email}</p>
-            <p>Phone: {customerData.phoneNumber}</p>
-          </div>
-
-          <h2>Book Appointment</h2>
           <form onSubmit={handleSubmit}>
             <div>
               <label htmlFor="salon">Select Salon:</label>
@@ -183,44 +221,56 @@ const CustomerDashboard = () => {
             </div>
 
             <div>
-              <label htmlFor="service">Select Service:</label>
-              <select id="service" value={selectedServiceId} onChange={(e) => setSelectedServiceId(e.target.value)}>
-                <option value="">-- Select Service --</option>
-                {services.map((service) => (
-                  <option key={service._id} value={service._id}>
-                    {service.name}
-                  </option>
-                ))}
-              </select>
+              <label htmlFor="services">Select Services:</label>
+              <div className="services-selection">
+                <select
+                  id="services"
+                  onChange={(e) => handleServiceSelect(e.target.value)}
+                  value=""
+                >
+                  <option value="">-- Select a Service --</option>
+                  {services.map((service) => (
+                    <option key={service._id} value={service._id}>
+                      {service.name} - {service.time}
+                    </option>
+                  ))}
+                </select>
+                <div className="selected-services">
+                  {selectedServiceIds.map((id) => {
+                    const service = services.find((service) => service._id === id);
+                    return (
+                      <div key={id} className="service-chip">
+                        {service.name}{" "}
+                        <button type="button" onClick={() => handleServiceRemove(id)}>
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             <div>
-              <label htmlFor="appointmentDate">Appointment Date:</label>
-              <input 
-                type="date" 
-                id="appointmentDate" 
-                value={appointmentDate} 
-                onChange={(e) => setAppointmentDate(e.target.value)} 
-              />
+              <label htmlFor="appointmentDate">Select Date:</label>
+              <input type="date" id="appointmentDate" value={appointmentDate} onChange={(e) => setAppointmentDate(e.target.value)} />
             </div>
 
             <div>
-              <label htmlFor="appointmentTime">Appointment Time:</label>
-              <input 
-                type="time" 
-                id="appointmentTime" 
-                value={appointmentTime} 
-                onChange={(e) => setAppointmentTime(e.target.value)} 
-              />
+              <label htmlFor="appointmentTime">Select Time:</label>
+              <input type="time" id="appointmentTime" value={appointmentTime} onChange={(e) => setAppointmentTime(e.target.value)} />
             </div>
 
-            {error && <p className="error">{error}</p>}
-
-            <button type="submit">Book Appointment</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Booking..." : "Book Appointment"}
+            </button>
           </form>
+          {successMessage && <p className="success">{successMessage}</p>}
+          {error && <p className="error">{error}</p>}
+          {errorMessage && <p className="error">{errorMessage}</p>}
         </>
       ) : (
-        <p>Loading customer data...</p>
+        <p>Loading...</p>
       )}
     </div>
   );

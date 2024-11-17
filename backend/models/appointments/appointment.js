@@ -1,50 +1,25 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
+
+const serviceDetailSchema = new mongoose.Schema({
+  serviceId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  serviceName: { type: String, required: true },
+  serviceDuration: { type: Number, required: true }, // Duration in minutes
+  servicePrice: { type: Number, required: true }     // Price in currency
+});
 
 const appointmentSchema = new mongoose.Schema({
-  customerId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Customer', 
-    required: true 
-  },
-  salonId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Salon', 
-    required: true 
-  },
-  serviceId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Service', 
-    required: true 
-  },
-  stylistId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Stylist' // Optional field; can be left out if not assigned
-  },
-  appointmentDate: { 
-    type: Date, 
-    required: true 
-  },
-  time: { 
-    type: String, // Holds the appointment time
-    required: true 
-  },
-  customerName: { 
-    type: String, // Added field for customer's name
-    required: true // Make this required if you always want a name
-  },
-  customerPhone: { 
-    type: String, // Added field for customer's phone number
-    required: true // Make this required if you always want a phone number
-  },
-  status: { 
-    type: String, 
-    enum: ['Pending', 'Confirmed', 'Rejected'], 
-    default: 'Pending' // Keeps default status as Pending
-  },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+  salonId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  appointmentDate: { type: Date, required: true },
+  time: { type: Number, required: true },
+  serviceDetails: [serviceDetailSchema],
+  totalServiceDuration: { type: Number, required: true },  // New field to store total duration
+  customerId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  customerName: { type: String, required: true },
+  customerPhone: { type: String, required: true },
+  stylistId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  status: { type: String, default: "Pending" },
 });
+
 
 module.exports = mongoose.model('Appointment', appointmentSchema);
