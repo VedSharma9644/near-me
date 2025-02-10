@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from 'react';
 import "./page.css"; // Styles for the header
 import { useRouter } from 'next/navigation';
