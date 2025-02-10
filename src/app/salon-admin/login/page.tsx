@@ -29,9 +29,13 @@ const SalonLogin = () => {
     
             if (response.ok) {
                 const data = await response.json();
-                console.log('Login successful:', data); // Check the received data
+                console.log('Login successful:', data); // Log the entire response
+                console.log('Salon ownerName:', data.salon.ownerName); // Log the ownerName specifically
+                console.log('Salon ID:', data.salon.id); // Log the Salon ID specifically
+                
                 localStorage.setItem('token', data.token); // Ensure token is stored
                 localStorage.setItem('ownerName', data.salon.ownerName); // Store owner's name
+                localStorage.setItem('Salon Id', data.salon.id); // Store owner's name
                 console.log('Token stored:', localStorage.getItem('token')); // Log stored token
                 router.push('/salon-admin/dashboard'); // Redirect on successful login
             } else {

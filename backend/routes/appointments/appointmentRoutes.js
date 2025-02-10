@@ -130,6 +130,7 @@ const checkSlotAvailability = async (salonId, appointmentDate, selectedTimeInMin
 
 
 // Route to create an appointment
+// Route to create an appointment
 router.post('/', async (req, res) => {
   const { salonId, appointmentDate, time, services, customerId, customerName, customerPhone, stylistId } = req.body;
 
@@ -138,22 +139,35 @@ router.post('/', async (req, res) => {
       return res.status(400).send({ message: 'No services provided' });
     }
 
+    // Calculate total service duration
     const totalServiceDuration = services.reduce((total, service) => total + service.duration, 0);
 
+    // Parse the selected time and appointment date
     const selectedTime = moment(time, 'hh:mm A');
     const selectedTimeInMinutes = selectedTime.hours() * 60 + selectedTime.minutes();
     const parsedAppointmentDate = moment(appointmentDate, 'YYYY-MM-DD').toDate();
 
+    // Check if the slot is available
     const result = await checkSlotAvailability(salonId, parsedAppointmentDate, selectedTimeInMinutes, totalServiceDuration, stylistId);
 
     if (result.available) {
+      // Get stylist details from the salon
+      const salon = await Salon.findById(salonId);
+      const stylist = salon.stylists.find(stylist => stylist._id.toString() === stylistId.toString());
+
+      if (!stylist) {
+        return res.status(404).send({ message: 'Stylist not found' });
+      }
+
+      // Prepare the service details
       const serviceDetails = services.map(service => ({
         serviceId: service.serviceId,
         serviceName: service.name,
         serviceDuration: service.duration,
-        servicePrice: service.price || 300,
+        servicePrice: service.price || 300,  // Default price if not provided
       }));
 
+      // Create the appointment with stylist details
       const appointment = new Appointment({
         salonId,
         appointmentDate: parsedAppointmentDate,
@@ -164,9 +178,12 @@ router.post('/', async (req, res) => {
         customerPhone,
         serviceDetails,
         stylistId,
-        status: 'Pending',
+        stylistName: stylist.name,  // Add stylist name
+        stylistImage: stylist.image,  // Add stylist image
+        status: 'Confirmed',  // Default status
       });
 
+      // Save the appointment
       await appointment.save();
       return res.status(201).send(appointment);
     } else {
@@ -180,6 +197,7 @@ router.post('/', async (req, res) => {
     res.status(500).send({ message: 'Error creating appointment', error: error.message });
   }
 });
+
 
 // Get appointments for a specific salon
 router.get('/salon/:salonId', async (req, res) => {

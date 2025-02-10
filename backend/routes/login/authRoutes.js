@@ -56,6 +56,7 @@ router.post('/login', async (req, res) => {
                 id: salon._id,
                 name: salon.name,
                 email: salon.email,
+                ownerName: salon.ownerName,  // Add ownerName to the response
             },
         });
     } catch (error) {

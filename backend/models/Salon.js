@@ -27,5 +27,7 @@ const salonSchema = new mongoose.Schema({
     ],
 }, { timestamps: true });
 
-const Salon = mongoose.model('Salon', salonSchema);
+// Check if the model is already defined to avoid overwriting
+const Salon = mongoose.models.Salon || mongoose.model('Salon', salonSchema);
+
 module.exports = Salon;

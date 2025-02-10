@@ -68,6 +68,7 @@ const CustomerDashboard = () => {
       const response = await fetch(`http://localhost:5000/api/appointments/${salonId}/stylists`);
       if (response.ok) {
         const data = await response.json();
+        console.log("Stylists fetched:", data); // Log for debugging
         setStylists(data);
       } else {
         throw new Error(`Failed to fetch stylists for salon ID: ${salonId}`);
@@ -77,6 +78,7 @@ const CustomerDashboard = () => {
       console.error("Error fetching stylists:", error);
     }
   };
+  
 
   const fetchServices = async (salonId) => {
     try {
@@ -92,6 +94,10 @@ const CustomerDashboard = () => {
       console.error("Error fetching services:", error);
     }
   };
+
+  
+
+
 
   const handleSalonChange = async (e) => {
     const salonId = e.target.value;
@@ -209,16 +215,35 @@ const CustomerDashboard = () => {
             </div>
 
             <div>
-              <label htmlFor="stylist">Select Stylist:</label>
-              <select id="stylist" value={selectedStylistId} onChange={(e) => setSelectedStylistId(e.target.value)}>
-                <option value="">-- Select Stylist --</option>
-                {stylists.map((stylist) => (
-                  <option key={stylist._id} value={stylist._id}>
-                    {stylist.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <label htmlFor="stylist">Select Stylist:</label>
+  <select
+    id="stylist"
+    value={selectedStylistId}
+    onChange={(e) => setSelectedStylistId(e.target.value)}
+  >
+    <option value="">-- Select Stylist --</option>
+    {stylists.map((stylist) => (
+      <option key={stylist._id} value={stylist._id}>
+        {stylist.name}
+      </option>
+    ))}
+  </select>
+  {selectedStylistId && (
+    <div>
+      <h3>Selected Stylist:</h3>
+      {stylists
+        .filter((stylist) => stylist._id === selectedStylistId)
+        .map((stylist) => (
+          <div key={stylist._id}>
+            <p>{stylist.name}</p>
+            {stylist.image && <img src={stylist.image} alt={stylist.name} width="50" height="50" />}
+          </div>
+        ))}
+    </div>
+  )}
+</div>
+
+
 
             <div>
               <label htmlFor="services">Select Services:</label>

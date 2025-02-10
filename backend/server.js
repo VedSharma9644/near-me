@@ -10,7 +10,8 @@ const salonRoutes = require('./routes/register/salonRoutes'); // Correct path fo
 const salonAdminRoutes = require('./routes/salonAdmin/salonAdminRoutes'); // Adjust based on your structure
 // For settings page routes
 const salonAdminSettingsRoutes = require('./routes/salonAPIs/salonSettings/salonAdminSettingsRoutes');
-
+// Fetch Appointments for Salons
+const fetchAppointmentsRoutes = require('./routes/appointments/fetchAppointmentsRoutes');
 
 
 
@@ -37,7 +38,7 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS to allow communication between front-end and back-end
-app.use(cors({ origin: 'http://localhost:3000' })); // Adjust the origin if needed
+app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3002"], })); // Adjust the origin if needed
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -81,11 +82,13 @@ app.use('/api/customers', customerDashboardRoutes); // Register the dashboard ro
 
 
 
-// Appoint APIs Endpoints
+// Appointment APIs Endpoints
 app.use('/api/appointments', stylistRoutes);
 app.use('/api/appointments', servicesRoutes); 
 // create appointment
 app.use('/api/appointments', appointmentRoutes);
+// Fetch Appointments 
+app.use('/api/appointments', fetchAppointmentsRoutes);
 
 
 
