@@ -38,8 +38,8 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS to allow communication between front-end and back-end
-app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3002"], })); // Adjust the origin if needed
-
+// app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3002"], })); // Adjust the origin if needed
+app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
