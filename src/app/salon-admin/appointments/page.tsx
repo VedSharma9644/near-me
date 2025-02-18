@@ -3,7 +3,19 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const SalonAppointments = () => {
-    const [appointments, setAppointments] = useState([]);
+    interface Appointment {
+        _id: string;
+        customerName: string;
+        serviceName: string;
+        serviceDuration: string;
+        servicePrice: string;
+        stylistId: string;
+        appointmentDate: string;
+        time: string;
+        status: string;
+    }
+
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
