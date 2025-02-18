@@ -130,7 +130,6 @@ const checkSlotAvailability = async (salonId, appointmentDate, selectedTimeInMin
 
 
 // Route to create an appointment
-// Route to create an appointment
 router.post('/', async (req, res) => {
   const { salonId, appointmentDate, time, services, customerId, customerName, customerPhone, stylistId } = req.body;
 
@@ -151,15 +150,20 @@ router.post('/', async (req, res) => {
     const result = await checkSlotAvailability(salonId, parsedAppointmentDate, selectedTimeInMinutes, totalServiceDuration, stylistId);
 
     if (result.available) {
-      // Get stylist details from the salon
+      // Get salon details
       const salon = await Salon.findById(salonId);
+      
+      // Find stylist in salon
       const stylist = salon.stylists.find(stylist => stylist._id.toString() === stylistId.toString());
+      
+      // Debugging: log stylist data
+      console.log('Stylist:', stylist);  // Ensure stylist data is being fetched
 
       if (!stylist) {
         return res.status(404).send({ message: 'Stylist not found' });
       }
 
-      // Prepare the service details
+      // Prepare service details
       const serviceDetails = services.map(service => ({
         serviceId: service.serviceId,
         serviceName: service.name,
@@ -167,7 +171,7 @@ router.post('/', async (req, res) => {
         servicePrice: service.price || 300,  // Default price if not provided
       }));
 
-      // Create the appointment with stylist details
+      // Create appointment with stylist details
       const appointment = new Appointment({
         salonId,
         appointmentDate: parsedAppointmentDate,
@@ -185,6 +189,7 @@ router.post('/', async (req, res) => {
 
       // Save the appointment
       await appointment.save();
+      console.log('Appointment created:', appointment);  // Check if stylistName is saved correctly
       return res.status(201).send(appointment);
     } else {
       return res.status(400).send({
@@ -197,6 +202,7 @@ router.post('/', async (req, res) => {
     res.status(500).send({ message: 'Error creating appointment', error: error.message });
   }
 });
+
 
 
 // Get appointments for a specific salon

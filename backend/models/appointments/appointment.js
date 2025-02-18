@@ -18,8 +18,8 @@ const appointmentSchema = new mongoose.Schema({
   customerName: { type: String, required: true },
   customerPhone: { type: String, required: true },
   stylistId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  stylistName: { type: String, required: true },  // Add stylistName directly in the schema
   status: { type: String, default: "Pending" },
 });
-
 
 module.exports = mongoose.model('Appointment', appointmentSchema);
